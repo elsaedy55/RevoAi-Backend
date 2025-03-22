@@ -25,9 +25,9 @@ router.post('/admin/login', async (req, res) => {
     }
 
     // التحقق من صحة بيانات الدخول في Firebase
-    const userRecord = await firebaseAdmin.signInWithEmailAndPassword(email, password);
+    const authResult = await firebaseAdmin.signInWithEmailAndPassword(email, password);
     
-    if (!userRecord) {
+    if (!authResult) {
       logger.error('Failed login attempt for admin:', email);
       return res.status(401).json({
         success: false,
@@ -35,16 +35,11 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    // إنشاء رمز مخصص للمشرف
-    const customToken = await firebaseAdmin.createCustomToken(rows[0].firebase_uid, {
-      is_admin: true
-    });
-
     res.json({
       success: true,
       message: 'تم تسجيل الدخول كمشرف بنجاح',
       data: {
-        token: customToken,
+        token: authResult.idToken,
         user: {
           id: rows[0].id,
           full_name: rows[0].full_name,

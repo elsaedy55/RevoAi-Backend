@@ -1,6 +1,7 @@
 const userModel = require('../models/user');
 const emailService = require('../utils/email');
 const { AppError } = require('../middleware/errorHandler');
+const { pool } = require('../config/database');
 
 class AdminController {
   // الحصول على قائمة المستخدمين

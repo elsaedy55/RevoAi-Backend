@@ -96,9 +96,7 @@ const firebaseAdmin = {
             const jsonResponse = JSON.parse(responseData);
             
             if (res.statusCode === 200 && jsonResponse.idToken) {
-              // تم تسجيل الدخول بنجاح، نقوم بجلب معلومات المستخدم
-              const userRecord = await this.getUserByEmail(email);
-              resolve(userRecord);
+              resolve({ idToken: jsonResponse.idToken });
             } else {
               console.error('Firebase Auth Error:', jsonResponse.error);
               resolve(null);

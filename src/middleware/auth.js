@@ -16,7 +16,7 @@ const authenticateToken = async (req, res, next) => {
     const idToken = authHeader.split(' ')[1];
     
     // التحقق من صحة الرمز باستخدام Firebase
-    const decodedToken = await firebaseAdmin.verifyToken(idToken);
+    const decodedToken = await firebaseAdmin.verifyIdToken(idToken);
     
     // البحث عن المستخدم في قاعدة البيانات
     const { rows } = await pool.query(
