@@ -1,0 +1,251 @@
+{
+  "info": {
+    "_postman_id": "e5b2c3f1-d8a4-4b6b-a8e5-9c7d8f6e4d3c",
+    "name": "Health Symptoms Analyzer API",
+    "description": "API لتحليل الأعراض الصحية باستخدام الذكاء الاصطناعي",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "{{API_URL}}"
+    },
+    {
+      "key": "firebase_token",
+      "value": "your_firebase_id_token_here",
+      "description": "رمز المصادقة من Firebase - يتم تحديثه بعد تسجيل الدخول"
+    }
+  ],
+  "item": [
+    {
+      "name": "المصادقة",
+      "item": [
+        {
+          "name": "تسجيل مستخدم جديد",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"firebase_uid\": \"uid_from_firebase\",\n    \"full_name\": \"احمد محمد\",\n    \"email\": \"ahmed@example.com\",\n    \"phone\": \"+201234567890\",\n    \"birth_date\": \"1990-01-01\",\n    \"address\": \"القاهرة، مصر\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "register"]
+            },
+            "description": "تسجيل مستخدم جديد في النظام بعد إنشاء حساب Firebase"
+          }
+        },
+        {
+          "name": "عرض الملف الشخصي",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "عرض معلومات المستخدم الحالي"
+          }
+        },
+        {
+          "name": "تحديث الملف الشخصي",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"full_name\": \"احمد محمد علي\",\n    \"phone\": \"+201234567890\",\n    \"birth_date\": \"1990-01-01\",\n    \"address\": \"القاهرة، مصر\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/profile",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "profile"]
+            },
+            "description": "تحديث معلومات المستخدم"
+          }
+        }
+      ]
+    },
+    {
+      "name": "البيانات الطبية",
+      "item": [
+        {
+          "name": "إضافة مرض مزمن",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"condition_name\": \"السكري\",\n    \"start_date\": \"2020-01-01\",\n    \"notes\": \"النوع الثاني\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/user/conditions",
+              "host": ["{{base_url}}"],
+              "path": ["user", "conditions"]
+            },
+            "description": "إضافة مرض مزمن جديد"
+          }
+        },
+        {
+          "name": "إضافة دواء",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"medication_name\": \"انسولين\",\n    \"dosage\": \"10 وحدات\",\n    \"frequency\": \"مرتين يومياً\",\n    \"start_date\": \"2020-01-01\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/user/medications",
+              "host": ["{{base_url}}"],
+              "path": ["user", "medications"]
+            },
+            "description": "إضافة دواء جديد"
+          }
+        }
+      ]
+    },
+    {
+      "name": "تحليل الأعراض",
+      "item": [
+        {
+          "name": "تحليل أعراض جديدة",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"symptoms\": [\"صداع\", \"دوخة\", \"غثيان\"],\n    \"additional_notes\": \"الأعراض تزداد في المساء\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/symptoms/analyze",
+              "host": ["{{base_url}}"],
+              "path": ["symptoms", "analyze"]
+            },
+            "description": "تحليل أعراض جديدة باستخدام الذكاء الاصطناعي"
+          }
+        },
+        {
+          "name": "سجل التحليلات",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/symptoms/history",
+              "host": ["{{base_url}}"],
+              "path": ["symptoms", "history"]
+            },
+            "description": "عرض سجل تحليلات الأعراض السابقة"
+          }
+        }
+      ]
+    },
+    {
+      "name": "لوحة التحكم",
+      "item": [
+        {
+          "name": "قائمة المستخدمين",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/users",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users"]
+            },
+            "description": "عرض قائمة المستخدمين (للمسؤولين فقط)"
+          }
+        },
+        {
+          "name": "إرسال إشعار",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{firebase_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"title\": \"تحديث مهم\",\n    \"message\": \"تم إضافة ميزات جديدة للتطبيق\",\n    \"user_ids\": [1, 2, 3]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/admin/notifications",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "notifications"]
+            },
+            "description": "إرسال إشعار للمستخدمين (للمسؤولين فقط)"
+          }
+        }
+      ]
+    }
+  ]
+}
