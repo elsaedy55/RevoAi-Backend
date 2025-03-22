@@ -8,17 +8,26 @@ const { AppError } = require('../middleware/errorHandler');
 
 // تسجيل دخول المشرفين
 router.post('/admin/login', async (req, res) => {
-  const { idToken } = req.body;
+  const { email, password } = req.body;
 
   try {
-    // التحقق من رمز Firebase
-    const decodedToken = await firebaseAdmin.verifyToken(idToken);
-    const { email, uid: firebase_uid } = decodedToken;
+    // التحقق من المستخدم في Firebase
+    const userRecord = await firebaseAdmin.getUserByEmail(email);
+    if (!userRecord) {
+      throw new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
+    }
+
+    // التحقق من كلمة المرور في Firebase
+    try {
+      await firebaseAdmin.auth().signInWithEmailAndPassword(email, password);
+    } catch (error) {
+      throw new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
+    }
 
     // التحقق من وجود المستخدم وأنه مشرف
     const { rows } = await pool.query(
       'SELECT id, full_name, email, is_admin FROM users WHERE firebase_uid = $1',
-      [firebase_uid]
+      [userRecord.uid]
     );
 
     if (rows.length === 0 || !rows[0].is_admin) {
@@ -26,7 +35,7 @@ router.post('/admin/login', async (req, res) => {
     }
 
     // إنشاء رمز JWT للمشرف
-    const token = await firebaseAdmin.createCustomToken(firebase_uid, {
+    const token = await firebaseAdmin.createCustomToken(userRecord.uid, {
       is_admin: true
     });
 
@@ -52,7 +61,6 @@ router.post('/admin/login', async (req, res) => {
     });
   }
 });
-
 
 // تسجيل معلومات المستخدم في قاعدة البيانات بعد إنشاء حساب Firebase
 router.post('/register', async (req, res) => {

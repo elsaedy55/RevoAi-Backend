@@ -78,6 +78,32 @@ npm start
 
 ## 📱 Firebase Authentication
 
+### Admin Login:
+```http
+POST /api/auth/admin/login
+Content-Type: application/json
+
+Request Body:
+{
+    "idToken": "firebase_id_token"
+}
+
+Response:
+{
+    "success": true,
+    "message": "تم تسجيل الدخول كمشرف بنجاح",
+    "data": {
+        "token": "custom_admin_token",
+        "user": {
+            "id": 1,
+            "full_name": "Admin Name",
+            "email": "admin@example.com",
+            "is_admin": true
+        }
+    }
+}
+```
+
 ### Creating a New Account:
 ```javascript
 POST /api/auth/register
@@ -134,136 +160,97 @@ For more authentication details, see [Authentication Guide](docs/AUTH.md)
 
 ---
 
-# نظام تحليل الأعراض الصحية باستخدام الذكاء الاصطناعي
+# نظام تحليل الأعراض الصحية - Revo AI
 
-[English](#revoai---ai-powered-health-symptom-analysis-system)
+## نظرة عامة
+نظام متكامل لتحليل الأعراض الصحية باستخدام الذكاء الاصطناعي. يساعد المرضى على فهم أعراضهم وتلقي توصيات طبية أولية.
 
-## 🌟 نظرة عامة
-نظام RESTful API متكامل لتحليل الأعراض الصحية باستخدام الذكاء الاصطناعي. يوفر:
-- المصادقة باستخدام Firebase
-- إدارة البيانات الصحية للمستخدمين
-- تحليل الأعراض باستخدام OpenAI
-- لوحة تحكم للمسؤولين
+## المميزات الرئيسية 🌟
+- مصادقة آمنة عبر Firebase 🔒
+- تحليل ذكي للأعراض عبر OpenAI 🤖
+- إدارة البيانات الطبية للمستخدمين 💊
+- لوحة تحكم للمشرفين 👥
+- نظام إشعارات متكامل 📨
 
-## 🚀 التقنيات المستخدمة
-- **Node.js & Express.js**: إطار العمل الرئيسي
-- **PostgreSQL (Neon)**: قاعدة البيانات السحابية
-- **Firebase Auth**: نظام المصادقة
+## التقنيات المستخدمة 🚀
+- **Node.js & Express**: إطار العمل الرئيسي
+- **PostgreSQL (Neon)**: قاعدة البيانات
+- **Firebase**: نظام المصادقة
 - **OpenAI**: تحليل الأعراض
-- **SendGrid**: إرسال البريد الإلكتروني
+- **SendGrid**: خدمة البريد
 
-## 📋 المتطلبات الأساسية
-1. Node.js (v14 أو أحدث)
-2. حساب Neon للـ PostgreSQL
-3. مشروع Firebase
-4. مفتاح OpenAI API
-5. حساب SendGrid (اختياري)
+## التثبيت والتشغيل ⚙️
 
-## ⚙️ التثبيت والإعداد
-
-### 1. إعداد Firebase:
-- انتقل إلى [Firebase Console](https://console.firebase.google.com)
-- أنشئ مشروعاً جديداً
-- فعّل Authentication مع Email/Password
-- احصل على مفتاح الخدمة (Service Account Key)
-
-### 2. إعداد المشروع:
+1. نسخ المشروع:
 ```bash
-# استنساخ المشروع
 git clone https://github.com/elsaedy55/RevoAi-Backend.git
 cd RevoAi-Backend
-
-# تثبيت التبعيات
 npm install
 ```
 
-### 3. إعداد الملفات البيئية:
-أنشئ ملف .env وأضف:
-```env
-# Server Configuration
-PORT=3000
-NODE_ENV=development
-API_URL=http://localhost:3000/api
+2. إعداد البيئة:
+- انسخ `example.env` إلى `.env`
+- عدّل المتغيرات حسب إعداداتك
 
-# Database Configuration
-DATABASE_URL=your_neon_database_url
-PGHOST=your_neon_host
-PGDATABASE=neondb
-PGUSER=your_username
-PGPASSWORD=your_password
-
-# Firebase Configuration
-FIREBASE_PROJECT_ID=your_project_id
-FIREBASE_PRIVATE_KEY="your_private_key"
-FIREBASE_CLIENT_EMAIL=your_client_email
-FIREBASE_AUTH_DOMAIN=your_auth_domain
-
-# OpenAI Configuration
-OPENAI_API_KEY=your_openai_api_key
-OPENAI_MODEL=gpt-4-turbo-preview
-```
-
-## 🏃‍♂️ تشغيل التطبيق
+3. تشغيل التطبيق:
 ```bash
-# وضع التطوير
-npm run dev
-
-# وضع الإنتاج
-npm start
+npm run dev  # للتطوير
+npm start    # للإنتاج
 ```
 
-## 📱 المصادقة باستخدام Firebase
+## الاستخدام السريع 📝
 
-### إنشاء حساب جديد:
+### تسجيل دخول المشرف
 ```javascript
-POST /api/auth/register
-{
-  "firebase_uid": "uid_from_firebase",
-  "full_name": "اسم المستخدم",
-  "email": "user@example.com",
-  "phone": "01234567890"
-}
+fetch('/api/auth/admin/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    email: 'admin@example.com',
+    password: 'password123'
+  })
+});
 ```
-
-### جلب معلومات المستخدم:
-```javascript
-GET /api/auth/profile
-Authorization: Bearer [firebase_id_token]
-```
-
-لمزيد من المعلومات حول المصادقة، راجع [دليل المصادقة](docs/AUTH.md)
-
-## 🛣️ نقاط النهاية API
-
-### البيانات الطبية
-- `POST /api/user/conditions`: إضافة مرض مزمن
-- `POST /api/user/medications`: إضافة دواء
-- `POST /api/user/surgeries`: إضافة عملية جراحية
 
 ### تحليل الأعراض
-- `POST /api/symptoms/analyze`: تحليل الأعراض
-- `GET /api/symptoms/history`: عرض سجل التحليلات
+```javascript
+fetch('/api/symptoms/analyze', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer YOUR_TOKEN'
+  },
+  body: JSON.stringify({
+    symptoms: ['صداع', 'دوخة'],
+    additional_notes: 'تزداد مع الإجهاد'
+  })
+});
+```
 
-### لوحة التحكم
-- `GET /api/admin/users`: عرض قائمة المستخدمين
-- `POST /api/admin/notifications`: إرسال إشعارات
+## نقاط النهاية API 🛣️
 
-## 🔒 الأمان
-- مصادقة آمنة عبر Firebase
-- حماية من هجمات SQL Injection
-- Rate Limiting لمنع هجمات Brute Force
-- تشفير البيانات الحساسة
+### المصادقة 🔑
+- `POST /auth/admin/login` تسجيل دخول المشرف
+- `POST /auth/register` تسجيل مستخدم جديد
+- `GET /auth/profile` عرض الملف الشخصي
 
-## 🎯 المميزات
-1. تحليل ذكي للأعراض باستخدام OpenAI
-2. نظام مصادقة قوي مع Firebase
-3. قاعدة بيانات سحابية مع Neon
-4. إدارة كاملة للبيانات الطبية
-5. لوحة تحكم للمسؤولين
+### البيانات الطبية 💉
+- `POST /user/conditions` إضافة مرض مزمن
+- `POST /user/medications` إضافة دواء
+- `POST /user/surgeries` إضافة عملية جراحية
 
-## 📚 الوثائق
+### تحليل الأعراض 🏥
+- `POST /symptoms/analyze` تحليل أعراض جديدة
+- `GET /symptoms/history` سجل التحليلات
+
+### لوحة التحكم 👨‍💼
+- `GET /admin/users` إدارة المستخدمين
+- `POST /admin/notifications` إرسال إشعارات
+
+## الوثائق 📚
+- [توثيق API](docs/API.md)
 - [دليل المصادقة](docs/AUTH.md)
-- [Postman Collection](postman_collection.json)
+- [مجموعة Postman](postman_collection.json)
 
-## 📄 الترخيص
-[ISC License](LICENSE)
+## الترخيص
+ISC

@@ -202,6 +202,28 @@
       "name": "لوحة التحكم",
       "item": [
         {
+          "name": "تسجيل دخول المشرف",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/admin/login",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "admin", "login"]
+            },
+            "description": "تسجيل دخول المشرفين باستخدام البريد الإلكتروني وكلمة المرور"
+          }
+        },
+        {
           "name": "قائمة المستخدمين",
           "request": {
             "method": "GET",
