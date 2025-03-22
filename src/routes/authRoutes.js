@@ -11,53 +11,53 @@ router.post('/admin/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // التحقق من المستخدم في Firebase
-    const userRecord = await firebaseAdmin.getUserByEmail(email);
-    if (!userRecord) {
-      throw new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
-    }
-
-    // التحقق من كلمة المرور في Firebase
-    try {
-      await firebaseAdmin.auth().signInWithEmailAndPassword(email, password);
-    } catch (error) {
-      throw new AppError('البريد الإلكتروني أو كلمة المرور غير صحيحة', 401);
-    }
-
-    // التحقق من وجود المستخدم وأنه مشرف
+    // البحث عن المستخدم في قاعدة البيانات أولاً
     const { rows } = await pool.query(
-      'SELECT id, full_name, email, is_admin FROM users WHERE firebase_uid = $1',
-      [userRecord.uid]
+      'SELECT id, full_name, email, is_admin, firebase_uid FROM users WHERE email = $1',
+      [email]
     );
 
     if (rows.length === 0 || !rows[0].is_admin) {
-      throw new AppError('غير مصرح لك بالدخول كمشرف', 403);
+      return res.status(401).json({
+        success: false,
+        message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+      });
     }
 
-    // إنشاء رمز JWT للمشرف
-    const token = await firebaseAdmin.createCustomToken(userRecord.uid, {
-      is_admin: true
-    });
+    try {
+      // التحقق من المستخدم في Firebase
+      const userRecord = await firebaseAdmin.getUserByEmail(email);
+      
+      // إنشاء رمز JWT للمشرف
+      const customToken = await firebaseAdmin.createCustomToken(userRecord.uid, {
+        is_admin: true
+      });
 
-    res.json({
-      success: true,
-      message: 'تم تسجيل الدخول كمشرف بنجاح',
-      data: {
-        token,
-        user: {
-          id: rows[0].id,
-          full_name: rows[0].full_name,
-          email: rows[0].email,
-          is_admin: rows[0].is_admin
+      res.status(200).json({
+        success: true,
+        message: 'تم تسجيل الدخول كمشرف بنجاح',
+        data: {
+          token: customToken,
+          user: {
+            id: rows[0].id,
+            full_name: rows[0].full_name,
+            email: rows[0].email,
+            is_admin: true
+          }
         }
-      }
-    });
-
+      });
+    } catch (firebaseError) {
+      logger.error('Firebase Auth Error:', firebaseError);
+      return res.status(401).json({
+        success: false,
+        message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
+      });
+    }
   } catch (error) {
     logger.error('Admin Login Error:', error);
-    res.status(error.status || 500).json({
+    return res.status(500).json({
       success: false,
-      message: error.message || 'حدث خطأ أثناء تسجيل الدخول'
+      message: 'حدث خطأ في تسجيل الدخول'
     });
   }
 });
