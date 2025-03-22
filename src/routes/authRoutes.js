@@ -11,7 +11,7 @@ router.post('/admin/login', async (req, res) => {
   const { email, password } = req.body;
 
   try {
-    // البحث عن المستخدم في قاعدة البيانات أولاً
+    // التحقق من وجود المستخدم في قاعدة البيانات
     const { rows } = await pool.query(
       'SELECT id, full_name, email, is_admin, firebase_uid FROM users WHERE email = $1',
       [email]
@@ -24,35 +24,35 @@ router.post('/admin/login', async (req, res) => {
       });
     }
 
-    try {
-      // التحقق من المستخدم في Firebase
-      const userRecord = await firebaseAdmin.getUserByEmail(email);
-      
-      // إنشاء رمز JWT للمشرف
-      const customToken = await firebaseAdmin.createCustomToken(userRecord.uid, {
-        is_admin: true
-      });
-
-      res.status(200).json({
-        success: true,
-        message: 'تم تسجيل الدخول كمشرف بنجاح',
-        data: {
-          token: customToken,
-          user: {
-            id: rows[0].id,
-            full_name: rows[0].full_name,
-            email: rows[0].email,
-            is_admin: true
-          }
-        }
-      });
-    } catch (firebaseError) {
-      logger.error('Firebase Auth Error:', firebaseError);
+    // التحقق من صحة بيانات الدخول في Firebase
+    const userRecord = await firebaseAdmin.signInWithEmailAndPassword(email, password);
+    
+    if (!userRecord) {
+      logger.error('Failed login attempt for admin:', email);
       return res.status(401).json({
         success: false,
         message: 'البريد الإلكتروني أو كلمة المرور غير صحيحة'
       });
     }
+
+    // إنشاء رمز مخصص للمشرف
+    const customToken = await firebaseAdmin.createCustomToken(rows[0].firebase_uid, {
+      is_admin: true
+    });
+
+    res.json({
+      success: true,
+      message: 'تم تسجيل الدخول كمشرف بنجاح',
+      data: {
+        token: customToken,
+        user: {
+          id: rows[0].id,
+          full_name: rows[0].full_name,
+          email: rows[0].email,
+          is_admin: true
+        }
+      }
+    });
   } catch (error) {
     logger.error('Admin Login Error:', error);
     return res.status(500).json({
