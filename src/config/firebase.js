@@ -24,6 +24,17 @@ const auth = admin.auth();
 
 // دوال مساعدة للتعامل مع Firebase
 const firebaseAdmin = {
+  // إنشاء رمز مخصص
+  async createCustomToken(uid, claims = {}) {
+    try {
+      const token = await admin.auth().createCustomToken(uid, claims);
+      return token;
+    } catch (error) {
+      console.error('Firebase Create Custom Token Error:', error);
+      throw error;
+    }
+  },
+
   // التحقق من صحة رمز المصادقة
   async verifyToken(idToken) {
     try {

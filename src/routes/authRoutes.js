@@ -4,6 +4,55 @@ const firebaseAdmin = require('../config/firebase');
 const { authenticateToken, requireAdmin } = require('../middleware/auth');
 const { pool } = require('../config/database');
 const { logger } = require('../middleware/errorHandler');
+const { AppError } = require('../middleware/errorHandler');
+
+// تسجيل دخول المشرفين
+router.post('/admin/login', async (req, res) => {
+  const { idToken } = req.body;
+
+  try {
+    // التحقق من رمز Firebase
+    const decodedToken = await firebaseAdmin.verifyToken(idToken);
+    const { email, uid: firebase_uid } = decodedToken;
+
+    // التحقق من وجود المستخدم وأنه مشرف
+    const { rows } = await pool.query(
+      'SELECT id, full_name, email, is_admin FROM users WHERE firebase_uid = $1',
+      [firebase_uid]
+    );
+
+    if (rows.length === 0 || !rows[0].is_admin) {
+      throw new AppError('غير مصرح لك بالدخول كمشرف', 403);
+    }
+
+    // إنشاء رمز JWT للمشرف
+    const token = await firebaseAdmin.createCustomToken(firebase_uid, {
+      is_admin: true
+    });
+
+    res.json({
+      success: true,
+      message: 'تم تسجيل الدخول كمشرف بنجاح',
+      data: {
+        token,
+        user: {
+          id: rows[0].id,
+          full_name: rows[0].full_name,
+          email: rows[0].email,
+          is_admin: rows[0].is_admin
+        }
+      }
+    });
+
+  } catch (error) {
+    logger.error('Admin Login Error:', error);
+    res.status(error.status || 500).json({
+      success: false,
+      message: error.message || 'حدث خطأ أثناء تسجيل الدخول'
+    });
+  }
+});
+
 
 // تسجيل معلومات المستخدم في قاعدة البيانات بعد إنشاء حساب Firebase
 router.post('/register', async (req, res) => {
